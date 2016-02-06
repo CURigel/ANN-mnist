@@ -66,6 +66,7 @@ nonlinear_derivative = tanh_derivative
 train_size = 5000
 test_size = 5000
 learning_rate = 0.5
+training_runs = 5000
 
 # Initialize the corresponding networks
 def init_feedforward_classifier(initialization_params):
@@ -102,9 +103,8 @@ def init_autoencoder(initialization_params):
 def init_autoencoder_classifier(initialization_params):
     # Place your code here
     return [autoencoder_classifier_state, autoencoder_classifier_connections]
-    
-    
-    
+
+
 # Given an input, these functions calculate the corresponding output to 
 # that input.
 def update_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections):
@@ -280,7 +280,7 @@ if __name__=='__main__':
     
     
     # Train network(s) here
-    training_params = None
+    training_params = [training_runs]
     feedforward_classifier_connections = train_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections, training_data, training_params)
     # Change training params if desired
     autoencoder_connections = train_autoencoder(autoencoder_state, autoencoder_connections, training_data, training_params)
