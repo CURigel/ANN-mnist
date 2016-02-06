@@ -174,7 +174,7 @@ def backpropagate_feedforward_classifier(feedforward_classifier_state, feedforwa
     layer_weights = feedforward_classifier_connections[0]
     threshold_weights = feedforward_classifier_connections[1]
 
-    weight_changes = np.npdarray((num_layers - 1, max_layer_size))
+    weight_changes = np.ndarray((num_layers - 1, max_layer_size))
     threshold_changes = np.ndarray(num_layers - 1)
 
     output_delta = (neuron_states[:-1] - label_vector) * nonlinear_derivative(neuron_states[:-1])
