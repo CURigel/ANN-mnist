@@ -165,7 +165,29 @@ def train_autoencoder(autoencoder_classifier_state, autoencoder_classifier_conne
 
 # Backpropagation functions
 def backpropagate_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections, label):
+    label_vector = np.zeros(10)
+    label_vector[label] = 1
+    neuron_states = feedforward_classifier_state[0]
+    num_layers = neuron_states.shape[0]
+    max_layer_size = neuron_states.shape[1]
+    layer_weights = feedforward_classifier_connections[0]
+    threshold_weights = feedforward_classifier_connections[1]
 
+    weight_changes = np.npdarray((num_layers - 1, max_layer_size))
+    threshold_changes = np.ndarray(num_layers - 1)
+
+    output_delta = (neuron_states[:-1] - label_vector) * nonlinear_derivative(neuron_states[:-1])
+    prev_delta = output_delta
+    for l in np.arange(1, num_layers-1)[::-1]:
+        weight_delta_sums = layer_weights[l].dot(prev_delta)
+        curr_delta = nonlinear_derivative(neuron_states[l]) * weight_delta_sums
+        threshold_delta = np.sum(threshold_weights[l] * prev_delta)
+        weight_changes[l] = -learning_rate * curr_delta * neuron_states[l-1]
+        threshold_changes[l] = -learning_rate * threshold_delta
+        prev_delta = curr_delta
+
+    layer_weights += weight_changes
+    threshold_weights += threshold_changes
     return feedforward_classifier_connections
 
 # Main functions to handle the testing of the networks. 
