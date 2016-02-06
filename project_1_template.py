@@ -113,10 +113,10 @@ def update_feedforward_classifier(feedforward_classifier_state, feedforward_clas
     layer_weights = feedforward_classifier_connections[0]
     threshold_weights = feedforward_classifier_connections[1]
 
-    for l in np.arange(1, feedforward_classifier_state.shape[0]):
+    for l in np.arange(1, neuron_states.shape[0]):
         input_sum = layer_weights[l-1].dot(neuron_states[l-1])
         input_sum += threshold_values[l-1] * threshold_weights[l-1]
-        input_sum = nonlinear(input_sum)
+        neuron_states[l] = nonlinear(input_sum)
 
     return feedforward_classifier_state
     
