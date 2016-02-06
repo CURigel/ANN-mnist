@@ -192,7 +192,7 @@ def backpropagate_feedforward_classifier(feedforward_classifier_state, feedforwa
     return feedforward_classifier_connections
 
 # Functions for outputing the results of an ANN on a data set
-def output_feedforward_classifier_performance(feedforward_classifier_state, feedforward_classifier_connections, check_data)
+def output_feedforward_classifier_performance(feedforward_classifier_state, feedforward_classifier_connections, check_data):
     data = check_data[0]
     labels = check_data[1]
     neuron_states = feedforward_classifier_state[0]
