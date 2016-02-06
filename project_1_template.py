@@ -148,6 +148,7 @@ def train_feedforward_classifier(feedforward_classifier_state, feedforward_class
         update_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections)
         feedforward_classifier_connections = backpropagate_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections, label)
 
+    output_feedforward_classifier_performance(feedforward_classifier_state, feedforward_classifier_connections, training_data)
     return feedforward_classifier_connections
     
 def train_autoencoder(autoencoder_state, autoencoder_connections, training_data, training_params):
@@ -189,6 +190,22 @@ def backpropagate_feedforward_classifier(feedforward_classifier_state, feedforwa
     layer_weights += weight_changes
     threshold_weights += threshold_changes
     return feedforward_classifier_connections
+
+# Functions for outputing the results of an ANN on a data set
+def output_feedforward_classifier_performance(feedforward_classifier_state, feedforward_classifier_connections, check_data)
+    data = check_data[0]
+    labels = check_data[1]
+    neuron_states = feedforward_classifier_state[0]
+
+    correct = 0
+    for i in np.arange(data.shape[0]):
+        neuron_states[0] = data[i]
+        update_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections)
+        prediction = np.argmax(neuron_states[:-1])
+        correct += 1 if prediction == labels[i] else 0
+
+    print (correct / data.shape[0])
+    None
 
 # Main functions to handle the testing of the networks. 
 # Feel free to write auxiliary functions and call them from here.
