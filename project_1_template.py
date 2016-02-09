@@ -64,10 +64,10 @@ def tanh_derivative(x):
 nonlinear = np.tanh
 nonlinear_derivative = tanh_derivative
 
-train_size = 5000
-test_size = 5000
+train_size = 8000
+test_size = 8000
 learning_rate = 0.5
-training_runs = 5000
+training_runs = 8000
 
 # Initialize the corresponding networks
 def init_feedforward_classifier(initialization_params):
@@ -276,7 +276,11 @@ if __name__=='__main__':
     full_mnist_data, full_mnist_labels = mnist.read_mnist_training_data(train_size + test_size)
     training_data = [full_mnist_data[:train_size], full_mnist_labels[:train_size]]
     test_data = [full_mnist_data[train_size:], full_mnist_labels[train_size:]]
-    
+
+    # Normalize data
+    training_data[0] = (training_data[0].astype(float) - training_data[0].mean()) / 256.0
+    test_data[0] = (test_data[0].astype(float) - test_data[0].mean()) / 256.0
+
     # You may also use the gui_template.py functions to collect image data from the user. eg:
     # training_data = gt.get_images()
     # if len(training_data) != 0:
