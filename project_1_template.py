@@ -68,6 +68,8 @@ train_size = 8000
 test_size = 8000
 learning_rate = 0.5
 training_runs = 8000
+stochastic_gradient_descent = False
+num_epochs = 10
 
 # Initialize the corresponding networks
 def init_feedforward_classifier(initialization_params):
@@ -140,20 +142,27 @@ def train_feedforward_classifier(feedforward_classifier_state, feedforward_class
     labels = training_data[1]
     neuron_states = feedforward_classifier_state[0]
 
-    # Stochastic gradient descent
-    for i in np.arange(num_runs):
-        rand_index = np.random.randint(0, data.shape[0])
-        datum = data[rand_index]
-        label = labels[rand_index]
-        neuron_states[0] = datum
-        update_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections)
-        feedforward_classifier_connections = backpropagate_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections, label)
-
-    # Gradient descent
+    if stochastic_gradient_descent:
+        # Stochastic gradient descent
+        for i in np.arange(num_runs):
+            rand_index = np.random.randint(0, data.shape[0])
+            feedforward_classifier_connections = descend_point(data[rand_index], labels[rand_index], feedforward_classifier_state, feedforward_classifier_connections)
+    else:
+        # Gradient descent
+        for epoch in np.arange(num_epochs):
+            for i in np.arange(data.shape[0]):
+                feedforward_classifier_connections = descend_point(data[i], labels[i], feedforward_classifier_state, feedforward_classifier_connections)
 
     output_feedforward_classifier_performance(feedforward_classifier_state, feedforward_classifier_connections, training_data)
     return feedforward_classifier_connections
-    
+
+
+def descend_point(datum, label, feedforward_classifier_state, feedforward_classifier_connections):
+    feedforward_classifier_state[0][0] = datum
+    update_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections)
+    return backpropagate_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections, label)
+
+
 def train_autoencoder(autoencoder_state, autoencoder_connections, training_data, training_params):
     # Place your code here
     
