@@ -51,6 +51,7 @@ import mnist_load_show as mnist
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from scipy import linalg,stats
+import sklearn.preprocessing as skpre
 # Uncomment if you will use the GUI code:
 # import gui_template as gt
 
@@ -89,9 +90,9 @@ def init_feedforward_classifier(initialization_params):
     layer_weights = np.random.random((num_layers - 1, max_layer_size, max_layer_size))
     threshold_weights = np.random.random((num_layers - 1, max_layer_size))
     for l in np.arange(num_layers - 1):
-        layer_weights[l][layer_sizes[l]:max_layer_size] = 0
-        layer_weights[l][:][layer_sizes[l+1]:max_layer_size] = 0
-        threshold_weights[l][layer_sizes[l]:max_layer_size] = 0
+        layer_weights[l, layer_sizes[l]:max_layer_size, :] = 0
+        layer_weights[l, :, layer_sizes[l+1]:max_layer_size] = 0
+        threshold_weights[l, layer_sizes[l+1]:max_layer_size] = 0
     feedforward_classifier_connections = [layer_weights, threshold_weights]
 
     return [feedforward_classifier_state, feedforward_classifier_connections]
@@ -114,7 +115,7 @@ def update_feedforward_classifier(feedforward_classifier_state, feedforward_clas
     threshold_weights = feedforward_classifier_connections[1]
 
     for l in np.arange(1, neuron_states.shape[0]):
-        input_sum = layer_weights[l-1].dot(neuron_states[l-1])
+        input_sum = layer_weights[l-1].T.dot(neuron_states[l-1])
         input_sum += threshold_values[l-1] * threshold_weights[l-1]
         neuron_states[l] = nonlinear(input_sum)
 
@@ -148,6 +149,8 @@ def train_feedforward_classifier(feedforward_classifier_state, feedforward_class
         update_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections)
         feedforward_classifier_connections = backpropagate_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections, label)
 
+    # Gradient descent
+
     output_feedforward_classifier_performance(feedforward_classifier_state, feedforward_classifier_connections, training_data)
     return feedforward_classifier_connections
     
@@ -174,18 +177,23 @@ def backpropagate_feedforward_classifier(feedforward_classifier_state, feedforwa
     layer_weights = feedforward_classifier_connections[0]
     threshold_weights = feedforward_classifier_connections[1]
 
-    weight_changes = np.ndarray((num_layers - 1, max_layer_size))
-    threshold_changes = np.ndarray(num_layers - 1)
+    weight_changes = np.ndarray((num_layers - 1, max_layer_size, max_layer_size))
+    threshold_changes = np.ndarray((num_layers - 1, max_layer_size))
 
-    output_delta = (neuron_states[:-1] - label_vector) * nonlinear_derivative(neuron_states[:-1])
+    # First consider the output deltas
+    error_vector = np.zeros(neuron_states.shape[1])
+    error_vector[:10] = neuron_states[-1][:10] - label_vector
+    deriv_output_values = nonlinear_derivative(neuron_states[-1])
+    output_delta = error_vector * deriv_output_values
+
+    # Now loop over the rest of the layers
+    # NOTE: W[i] goes from layer i to layer i+1, not from i-1 to i!
     prev_delta = output_delta
-    for l in np.arange(1, num_layers-1)[::-1]:
+    for l in np.arange(0, num_layers-1)[::-1]:
+        weight_changes[l] = -learning_rate * np.outer(neuron_states[l], prev_delta)
+        threshold_changes[l] = -learning_rate * prev_delta
         weight_delta_sums = layer_weights[l].dot(prev_delta)
-        curr_delta = nonlinear_derivative(neuron_states[l]) * weight_delta_sums
-        threshold_delta = np.sum(threshold_weights[l] * prev_delta)
-        weight_changes[l] = -learning_rate * curr_delta * neuron_states[l-1]
-        threshold_changes[l] = -learning_rate * threshold_delta
-        prev_delta = curr_delta
+        prev_delta = nonlinear_derivative(neuron_states[l]) * weight_delta_sums
 
     layer_weights += weight_changes
     threshold_weights += threshold_changes
@@ -201,10 +209,10 @@ def output_feedforward_classifier_performance(feedforward_classifier_state, feed
     for i in np.arange(data.shape[0]):
         neuron_states[0] = data[i]
         update_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections)
-        prediction = np.argmax(neuron_states[:-1])
+        prediction = np.argmax(neuron_states[-1])
         correct += 1 if prediction == labels[i] else 0
 
-    print (correct / data.shape[0])
+    print (float(correct) / float(data.shape[0]))
     None
 
 # Main functions to handle the testing of the networks. 
@@ -248,7 +256,6 @@ def test_autoencoder_classifier(autoencoder_classifier_state, autoencoder_classi
 #     None
 # def load_autoencoder(filename):
 #     return [autoencoder_classifier_state, autoencoder_classifier_connections]
-
 
 
 if __name__=='__main__':
