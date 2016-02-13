@@ -69,15 +69,15 @@ def tanh_derivative_wrt_tanhx(x):
     return (np.square(x) * - 1) + 1
 def sigm_derivative_wrt_sigmx(x):
     return x * ((x * -1) + 1)
-nonlinear = expit
-nonlinear_derivative = sigm_derivative
-nonlinear_derivative_wrt_nonlinear_x = sigm_derivative_wrt_sigmx
+nonlinear = np.tanh
+nonlinear_derivative = tanh_derivative
+nonlinear_derivative_wrt_nonlinear_x = tanh_derivative_wrt_tanhx
 
 train_size = 8000
 test_size = 8000
 learning_rate = 0.5
-training_runs = 1000
-stochastic_gradient_descent = False
+training_runs = 8000
+stochastic_gradient_descent = True
 num_epochs = 5000
 
 # Initialize the corresponding networks
