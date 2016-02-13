@@ -96,8 +96,8 @@ nonlinear_max_init_weight = tanh_init_weight_max
 
 train_size = 8000
 test_size = 8000
-learning_rate = 0.5
-training_runs = 8000
+learning_rate = 0.01
+training_runs = 16000
 stochastic_gradient_descent = True
 num_epochs = 5000
 
@@ -192,6 +192,7 @@ def train_feedforward_classifier(feedforward_classifier_state, feedforward_class
             for i in np.arange(data.shape[0]):
                 feedforward_classifier_connections = descend_point(data[i], labels[i], num_outputs, feedforward_classifier_state, feedforward_classifier_connections)
 
+    print "Training set performance:"
     output_feedforward_classifier_performance(feedforward_classifier_state, feedforward_classifier_connections, training_data)
     return feedforward_classifier_connections
 
@@ -267,9 +268,9 @@ def output_feedforward_classifier_performance(feedforward_classifier_state, feed
 # Feel free to write auxiliary functions and call them from here.
 # These functions are supposed to call the 'run' functions.
 def test_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections, test_data, test_params):
-    # Place your code here
-    
-    # Please do output your test performance here
+    # We assume here that the network has already been trained.
+    print "Test set performance:"
+    output_feedforward_classifier_performance(feedforward_classifier_state, feedforward_classifier_connections, test_data)
     None
     
 def test_autoencoder(autoencoder_state, autoencoder_connections, test_data, test_params):
@@ -340,7 +341,7 @@ if __name__=='__main__':
     # Initialize network(s) here
     input_size = (28 * 28)  # Pixels in the image
     output_size = 10  # Possible classifications
-    layer_sizes = np.asarray([input_size, np.sqrt(input_size), output_size])
+    layer_sizes = np.asarray([input_size, 300, output_size])
     initialization_params = [layer_sizes]
     feedforward_classifier_state = None
     feedforward_classifier_connections = None 
