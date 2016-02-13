@@ -293,18 +293,12 @@ if __name__=='__main__':
     
     # Read data here
     full_mnist_data, full_mnist_labels = mnist.read_mnist_training_data(train_size + test_size)
-    # training_data = [full_mnist_data[:train_size], full_mnist_labels[:train_size]]
-    # test_data = [full_mnist_data[train_size:], full_mnist_labels[train_size:]]
+    training_data = [full_mnist_data[:train_size], full_mnist_labels[:train_size]]
+    test_data = [full_mnist_data[train_size:], full_mnist_labels[train_size:]]
 
     # Normalize data
-    # training_data[0] = (training_data[0].astype(float) - training_data[0].mean()) / 256.0
-    # test_data[0] = (test_data[0].astype(float) - test_data[0].mean()) / 256.0
-
-    # DEBUGGING DATA
-    XOR_data_inputs = np.asarray([[0, 0], [1, 0], [0, 1], [1, 1]])
-    XOR_data_labels = np.asarray([0, 1, 1, 0])
-    training_data = [XOR_data_inputs, XOR_data_labels]
-    test_data = training_data
+    training_data[0] = (training_data[0].astype(float) - training_data[0].mean()) / 256.0
+    test_data[0] = (test_data[0].astype(float) - test_data[0].mean()) / 256.0
 
     # You may also use the gui_template.py functions to collect image data from the user. eg:
     # training_data = gt.get_images()
@@ -317,12 +311,7 @@ if __name__=='__main__':
     # Initialize network(s) here
     input_size = (28 * 28)  # Pixels in the image
     output_size = 10  # Possible classifications
-    # layer_sizes = np.asarray([input_size, np.sqrt(input_size), output_size])
-
-    # DEBUGGING XOR
-    layer_sizes = np.asarray([2, 2, 2])
-    output_size = 2
-
+    layer_sizes = np.asarray([input_size, np.sqrt(input_size), output_size])
     initialization_params = [layer_sizes]
     feedforward_classifier_state = None
     feedforward_classifier_connections = None 
