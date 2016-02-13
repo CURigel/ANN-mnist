@@ -75,10 +75,10 @@ nonlinear_derivative_wrt_nonlinear_x = sigm_derivative_wrt_sigmx
 
 train_size = 8000
 test_size = 8000
-learning_rate = 0.1
+learning_rate = 0.5
 training_runs = 1000
-stochastic_gradient_descent = True
-num_epochs = 10
+stochastic_gradient_descent = False
+num_epochs = 5000
 
 # Initialize the corresponding networks
 def init_feedforward_classifier(initialization_params):
@@ -320,7 +320,7 @@ if __name__=='__main__':
     # layer_sizes = np.asarray([input_size, np.sqrt(input_size), output_size])
 
     # DEBUGGING XOR
-    layer_sizes = np.asarray([2, 1, 2])
+    layer_sizes = np.asarray([2, 2, 2])
     output_size = 2
 
     initialization_params = [layer_sizes]
