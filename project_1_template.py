@@ -48,6 +48,7 @@
  
 import numpy as np
 import mnist_load_show as mnist
+from scipy.special import expit
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from scipy import linalg,stats
@@ -61,6 +62,9 @@ import sklearn.preprocessing as skpre
 # Allow switching nonlinearities
 def tanh_derivative(x):
     return (np.square(np.tanh(x)) * -1) + 1
+def sigm_derivative(x):
+    sigm = expit(x)
+    return sigm * ((sigm * -1) + 1)
 nonlinear = np.tanh
 nonlinear_derivative = tanh_derivative
 
