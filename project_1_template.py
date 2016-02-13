@@ -60,7 +60,7 @@ import sklearn.preprocessing as skpre
 
 # Allow switching nonlinearities
 def tanh_derivative(x):
-    return np.square(np.tanh(x)) + (-1)
+    return (np.square(np.tanh(x)) * -1) + 1
 nonlinear = np.tanh
 nonlinear_derivative = tanh_derivative
 
