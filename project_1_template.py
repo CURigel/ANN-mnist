@@ -66,9 +66,9 @@ nonlinear_derivative = tanh_derivative
 
 train_size = 8000
 test_size = 8000
-learning_rate = 0.5
-training_runs = 8000
-stochastic_gradient_descent = False
+learning_rate = 0.1
+training_runs = 1000
+stochastic_gradient_descent = True
 num_epochs = 10
 
 # Initialize the corresponding networks
@@ -138,6 +138,7 @@ def update_autoencoder_classifier(autoencoder_classifier_state, autoencoder_clas
 # These functions are supposed to call the update functions.
 def train_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections, training_data, training_params):
     num_runs = training_params[0]
+    num_outputs = training_params[1]
     data = training_data[0]
     labels = training_data[1]
     neuron_states = feedforward_classifier_state[0]
@@ -146,21 +147,21 @@ def train_feedforward_classifier(feedforward_classifier_state, feedforward_class
         # Stochastic gradient descent
         for i in np.arange(num_runs):
             rand_index = np.random.randint(0, data.shape[0])
-            feedforward_classifier_connections = descend_point(data[rand_index], labels[rand_index], feedforward_classifier_state, feedforward_classifier_connections)
+            feedforward_classifier_connections = descend_point(data[rand_index], labels[rand_index], num_outputs, feedforward_classifier_state, feedforward_classifier_connections)
     else:
         # Gradient descent
         for epoch in np.arange(num_epochs):
             for i in np.arange(data.shape[0]):
-                feedforward_classifier_connections = descend_point(data[i], labels[i], feedforward_classifier_state, feedforward_classifier_connections)
+                feedforward_classifier_connections = descend_point(data[i], labels[i], num_outputs, feedforward_classifier_state, feedforward_classifier_connections)
 
     output_feedforward_classifier_performance(feedforward_classifier_state, feedforward_classifier_connections, training_data)
     return feedforward_classifier_connections
 
 
-def descend_point(datum, label, feedforward_classifier_state, feedforward_classifier_connections):
+def descend_point(datum, label, num_outputs, feedforward_classifier_state, feedforward_classifier_connections):
     feedforward_classifier_state[0][0] = datum
     update_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections)
-    return backpropagate_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections, label)
+    return backpropagate_feedforward_classifier(num_outputs, feedforward_classifier_state, feedforward_classifier_connections, label)
 
 
 def train_autoencoder(autoencoder_state, autoencoder_connections, training_data, training_params):
@@ -177,8 +178,8 @@ def train_autoencoder(autoencoder_classifier_state, autoencoder_classifier_conne
 
 
 # Backpropagation functions
-def backpropagate_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections, label):
-    label_vector = np.zeros(10)
+def backpropagate_feedforward_classifier(num_outputs, feedforward_classifier_state, feedforward_classifier_connections, label):
+    label_vector = np.zeros(num_outputs)
     label_vector[label] = 1
     neuron_states = feedforward_classifier_state[0]
     num_layers = neuron_states.shape[0]
@@ -191,7 +192,7 @@ def backpropagate_feedforward_classifier(feedforward_classifier_state, feedforwa
 
     # First consider the output deltas
     error_vector = np.zeros(neuron_states.shape[1])
-    error_vector[:10] = neuron_states[-1][:10] - label_vector
+    error_vector[:num_outputs] = neuron_states[-1][:num_outputs] - label_vector
     deriv_output_values = nonlinear_derivative(neuron_states[-1])
     output_delta = error_vector * deriv_output_values
 
@@ -283,12 +284,18 @@ if __name__=='__main__':
     
     # Read data here
     full_mnist_data, full_mnist_labels = mnist.read_mnist_training_data(train_size + test_size)
-    training_data = [full_mnist_data[:train_size], full_mnist_labels[:train_size]]
-    test_data = [full_mnist_data[train_size:], full_mnist_labels[train_size:]]
+    # training_data = [full_mnist_data[:train_size], full_mnist_labels[:train_size]]
+    # test_data = [full_mnist_data[train_size:], full_mnist_labels[train_size:]]
 
     # Normalize data
-    training_data[0] = (training_data[0].astype(float) - training_data[0].mean()) / 256.0
-    test_data[0] = (test_data[0].astype(float) - test_data[0].mean()) / 256.0
+    # training_data[0] = (training_data[0].astype(float) - training_data[0].mean()) / 256.0
+    # test_data[0] = (test_data[0].astype(float) - test_data[0].mean()) / 256.0
+
+    # DEBUGGING DATA
+    XOR_data_inputs = np.asarray([[0, 0], [1, 0], [0, 1], [1, 1]])
+    XOR_data_labels = np.asarray([0, 1, 1, 0])
+    training_data = [XOR_data_inputs, XOR_data_labels]
+    test_data = training_data
 
     # You may also use the gui_template.py functions to collect image data from the user. eg:
     # training_data = gt.get_images()
@@ -301,7 +308,12 @@ if __name__=='__main__':
     # Initialize network(s) here
     input_size = (28 * 28)  # Pixels in the image
     output_size = 10  # Possible classifications
-    layer_sizes = np.asarray([input_size, np.sqrt(input_size), output_size])
+    # layer_sizes = np.asarray([input_size, np.sqrt(input_size), output_size])
+
+    # DEBUGGING XOR
+    layer_sizes = np.asarray([2, 1, 2])
+    output_size = 2
+
     initialization_params = [layer_sizes]
     feedforward_classifier_state = None
     feedforward_classifier_connections = None 
@@ -317,7 +329,7 @@ if __name__=='__main__':
     
     
     # Train network(s) here
-    training_params = [training_runs]
+    training_params = [training_runs, output_size]
     feedforward_classifier_connections = train_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections, training_data, training_params)
     # Change training params if desired
     autoencoder_connections = train_autoencoder(autoencoder_state, autoencoder_connections, training_data, training_params)
