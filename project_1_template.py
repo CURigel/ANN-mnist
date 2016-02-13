@@ -62,16 +62,37 @@ import sklearn.preprocessing as skpre
 # Allow switching nonlinearities
 def tanh_derivative(x):
     return (np.square(np.tanh(x)) * -1) + 1
+
+
 def sigm_derivative(x):
     sigm = expit(x)
     return sigm * ((sigm * -1) + 1)
+
+
 def tanh_derivative_wrt_tanhx(x):
     return (np.square(x) * - 1) + 1
+
+
 def sigm_derivative_wrt_sigmx(x):
     return x * ((x * -1) + 1)
+
+
+def tanh_init_weight_max(layer_sizes):
+    layer_weight_maxes = np.ndarray(layer_sizes.shape[0] - 1)
+    for i in np.arange(layer_weight_maxes.shape[0]):
+        layer_weight_maxes[i] = np.sqrt(6.0 / (layer_sizes[i] + layer_sizes[i+1]))
+    return layer_weight_maxes
+
+
+def sigm_init_weight_max(layer_sizes):
+    return tanh_init_weight_max(layer_sizes) * 4
+
+
 nonlinear = np.tanh
 nonlinear_derivative = tanh_derivative
 nonlinear_derivative_wrt_nonlinear_x = tanh_derivative_wrt_tanhx
+nonlinear_max_init_weight = tanh_init_weight_max
+
 
 train_size = 8000
 test_size = 8000
@@ -93,14 +114,22 @@ def init_feedforward_classifier(initialization_params):
     threshold_values = np.ones(num_layers - 1)
     feedforward_classifier_state = [neuron_states, threshold_values]
 
+    # Calculate random weight interval.  See http://deeplearning.net/tutorial/mlp.html for justification
+    max_weights = nonlinear_max_init_weight(layer_sizes)
+    min_weights = max_weights * -1
+
     # Initialize classifier weights.  Use a 3D array, layers x inputs x outputs.
     # Threshold weights too, but only a 2D needed for those
     # Also set weights for neurons which do not exist to 0
     # Since those weights will never contribute to sums in subsequent layers,
     # backpropagation should never cause them to change
-    layer_weights = np.random.random((num_layers - 1, max_layer_size, max_layer_size))
-    threshold_weights = np.random.random((num_layers - 1, max_layer_size))
+    layer_weights = np.ndarray((num_layers - 1, max_layer_size, max_layer_size))
+    threshold_weights = np.ndarray((num_layers - 1, max_layer_size))
     for l in np.arange(num_layers - 1):
+        layer_weights[l] = np.random.uniform(low=min_weights[l], high=max_weights[l],
+                                             size=(max_layer_size, max_layer_size))
+        threshold_weights[l] = np.random.uniform(low=min_weights[l], high=max_weights[l],
+                                                 size=max_layer_size)
         layer_weights[l, layer_sizes[l]:max_layer_size, :] = 0
         layer_weights[l, :, layer_sizes[l+1]:max_layer_size] = 0
         threshold_weights[l, layer_sizes[l+1]:max_layer_size] = 0
