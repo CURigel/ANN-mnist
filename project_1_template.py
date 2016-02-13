@@ -75,7 +75,7 @@ nonlinear_derivative_wrt_nonlinear_x = sigm_derivative_wrt_sigmx
 
 train_size = 8000
 test_size = 8000
-learning_rate = 0.5
+learning_rate = 0.1
 training_runs = 1000
 stochastic_gradient_descent = True
 num_epochs = 10
@@ -105,20 +105,6 @@ def init_feedforward_classifier(initialization_params):
         layer_weights[l, :, layer_sizes[l+1]:max_layer_size] = 0
         threshold_weights[l, layer_sizes[l+1]:max_layer_size] = 0
     feedforward_classifier_connections = [layer_weights, threshold_weights]
-
-    # DEBUGGING example weights
-    layer_weights[0, 0, 0] = 0.15
-    layer_weights[0, 1, 0] = 0.20
-    layer_weights[0, 0, 1] = 0.25
-    layer_weights[0, 1, 1] = 0.30
-    layer_weights[1, 0, 0] = 0.40
-    layer_weights[1, 1, 0] = 0.45
-    layer_weights[1, 0, 1] = 0.50
-    layer_weights[1, 1, 1] = 0.55
-    threshold_weights[0, 0] = 0.35
-    threshold_weights[0, 1] = 0.35
-    threshold_weights[1, 0] = 0.60
-    threshold_weights[1, 1] = 0.60
 
     return [feedforward_classifier_state, feedforward_classifier_connections]
 
@@ -315,9 +301,9 @@ if __name__=='__main__':
     # test_data[0] = (test_data[0].astype(float) - test_data[0].mean()) / 256.0
 
     # DEBUGGING DATA
-    # XOR_data_inputs = np.asarray([[0, 0], [1, 0], [0, 1], [1, 1]])
-    # XOR_data_labels = np.asarray([0, 1, 1, 0])
-    training_data = [np.asarray([[0.05, 0.10]]), [1]]
+    XOR_data_inputs = np.asarray([[0, 0], [1, 0], [0, 1], [1, 1]])
+    XOR_data_labels = np.asarray([0, 1, 1, 0])
+    training_data = [XOR_data_inputs, XOR_data_labels]
     test_data = training_data
 
     # You may also use the gui_template.py functions to collect image data from the user. eg:
@@ -334,7 +320,7 @@ if __name__=='__main__':
     # layer_sizes = np.asarray([input_size, np.sqrt(input_size), output_size])
 
     # DEBUGGING XOR
-    layer_sizes = np.asarray([2, 2, 2])
+    layer_sizes = np.asarray([2, 1, 2])
     output_size = 2
 
     initialization_params = [layer_sizes]
