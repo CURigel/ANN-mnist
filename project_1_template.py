@@ -65,8 +65,13 @@ def tanh_derivative(x):
 def sigm_derivative(x):
     sigm = expit(x)
     return sigm * ((sigm * -1) + 1)
-nonlinear = np.tanh
-nonlinear_derivative = tanh_derivative
+def tanh_derivative_wrt_tanhx(x):
+    return (np.square(x) * - 1) + 1
+def sigm_derivative_wrt_sigmx(x):
+    return x * ((x * -1) + 1)
+nonlinear = expit
+nonlinear_derivative = sigm_derivative
+nonlinear_derivative_wrt_nonlinear_x = sigm_derivative_wrt_sigmx
 
 train_size = 8000
 test_size = 8000
@@ -197,7 +202,7 @@ def backpropagate_feedforward_classifier(num_outputs, feedforward_classifier_sta
     # First consider the output deltas
     error_vector = np.zeros(neuron_states.shape[1])
     error_vector[:num_outputs] = neuron_states[-1][:num_outputs] - label_vector
-    deriv_output_values = nonlinear_derivative(neuron_states[-1])
+    deriv_output_values = nonlinear_derivative_wrt_nonlinear_x(neuron_states[-1])
     output_delta = error_vector * deriv_output_values
 
     # Now loop over the rest of the layers
@@ -207,7 +212,7 @@ def backpropagate_feedforward_classifier(num_outputs, feedforward_classifier_sta
         weight_changes[l] = -learning_rate * np.outer(neuron_states[l], prev_delta)
         threshold_changes[l] = -learning_rate * prev_delta
         weight_delta_sums = layer_weights[l].dot(prev_delta)
-        prev_delta = nonlinear_derivative(neuron_states[l]) * weight_delta_sums
+        prev_delta = nonlinear_derivative_wrt_nonlinear_x(neuron_states[l]) * weight_delta_sums
 
     layer_weights += weight_changes
     threshold_weights += threshold_changes
