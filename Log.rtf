@@ -43,6 +43,6 @@ This document is for me to record my thoughts as I work on implementing a simple
 \pard\sa200\sl276\slmult1\b 15/02/2016\par
 
 \pard{\pntext\f1\'B7\tab}{\*\pn\pnlvlblt\pnf1\pnindent0{\pntxtb\'B7}}\fi-360\li720\sa200\sl276\slmult1\b0 Before I start with the autoencoder, I have to make a couple of changes to my current code.  The way I handle labels right now is to just pass in the index in the output which we want to be 1.  This won't work for the autoencoder.  Instead, we'll want to pass in a vector.  I think we might as well make this change for the regular network as well, and just add a helper function to get the appropriate vector from an index.\par
-{\pntext\f1\'B7\tab}I also want to make the change I discussed previously regarding removing the zero entries and switching to a list of layers rather than 3D ndarray.  I actually intend to stick with tanh, but I think it may be worth it from an efficiency perspective (computing less 0 * x steps).\par
+{\pntext\f1\'B7\tab}I also want to make the change I discussed previously regarding removing the zero entries and switching to a list of layers rather than 3D ndarray.  I actually intend to stick with tanh, but I think it may be worth it from an efficiency perspective (computing less 0 * x steps). \par
 }
  

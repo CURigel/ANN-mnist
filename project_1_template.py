@@ -213,9 +213,7 @@ def train_autoencoder(autoencoder_classifier_state, autoencoder_classifier_conne
 
 
 # Backpropagation functions
-def backpropagate_feedforward_classifier(num_outputs, feedforward_classifier_state, feedforward_classifier_connections, label):
-    label_vector = np.zeros(num_outputs)
-    label_vector[label] = 1
+def backpropagate_feedforward_classifier(num_outputs, feedforward_classifier_state, feedforward_classifier_connections, label_vector):
     neuron_states = feedforward_classifier_state[0]
     num_layers = len(neuron_states)
     layer_weights = feedforward_classifier_connections[0]
@@ -254,13 +252,16 @@ def output_feedforward_classifier_performance(feedforward_classifier_state, feed
     neuron_states = feedforward_classifier_state[0]
 
     correct = 0
+    total_error = 0.0
     for i in np.arange(data.shape[0]):
         neuron_states[0] = data[i]
         update_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections)
         prediction = np.argmax(neuron_states[-1])
-        correct += 1 if prediction == labels[i] else 0
+        correct += 1 if prediction == np.argmax(labels[i]) else 0
+        total_error += np.linalg.norm((neuron_states[-1] - labels[i]))
 
-    print (float(correct) / float(data.shape[0]))
+    print '{}% correct prediction.'.format(float(correct) / float(data.shape[0]))
+    print '{} mean squared error'.format(total_error / float(data.shape[0]))
     None
 
 # Main functions to handle the testing of the networks. 
@@ -283,7 +284,12 @@ def test_autoencoder_classifier(autoencoder_classifier_state, autoencoder_classi
     
     # Please do output your test performance here
     None
-    
+
+
+def label_vectors_from_indicies(indicies, size):
+    error_vectors = np.ones((indicies.shape[0], size))
+    error_vectors[np.arange(indicies.shape[0]), indicies] = 1
+    return error_vectors
 
 
 # You may also want to be able to save and load your networks, which will 
@@ -324,6 +330,9 @@ if __name__=='__main__':
     full_mnist_data, full_mnist_labels = mnist.read_mnist_training_data(train_size + test_size)
     training_data = [full_mnist_data[:train_size], full_mnist_labels[:train_size]]
     test_data = [full_mnist_data[train_size:], full_mnist_labels[train_size:]]
+
+    training_data[1] = label_vectors_from_indicies(training_data[1], 10)
+    test_data[1] = label_vectors_from_indicies(test_data[1], 10)
 
     # Normalize data
     training_data[0] = (training_data[0].astype(float) - training_data[0].mean()) / 256.0
