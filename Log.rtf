@@ -36886,6 +36886,8 @@ ffff030000000000
 }\par
 {\pntext\f1\'B7\tab}I notice as the autoencoder gets fewer neurons, line thickness varies less.  Which makes sense.  And of course there's much more noise.  We can start to see shadows of other image features behind the numbers themselves.  Interesting stuff.  I'm pretty happy with the results.\par
 {\pntext\f1\'B7\tab}Done implementing the autoencoder classifier.  Fairly promising results so far- 89% correct on the test set with 100 neurons in the autoencoder layer and 50 in the classifier layer.\par
+{\pntext\f1\'B7\tab}So now it's time to experiment.  I think the first thing I'm going to try doing is increasing the MNIST set I'm looking at from 8000 training and test to 30000 training and test, to make use of the full database.  \par
+{\pntext\f1\'B7\tab}Using the full data set gives a 93.8% correct prediction rate for the 300 hidden layer neuron (HLN) feedforward classifier on the test set.  The regular autoencoder, with 100HLN, has a mean squared error of 2.6.  The autoencoder classifier has a 93.5% correct prediction rate on the test set, with 100 and then 50 HLU.  An interesting result.  The autoencoder classifier has only half as many hidden layer neurons total, but gets about the same prediction rate.  \par
 
 \pard\sa200\sl276\slmult1\par
 }

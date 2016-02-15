@@ -95,10 +95,10 @@ nonlinear_derivative_wrt_nonlinear_x = tanh_derivative_wrt_tanhx
 nonlinear_max_init_weight = tanh_init_weight_max
 
 
-train_size = 8000
-test_size = 8000
+train_size = 30000
+test_size = 30000
 learning_rate = 0.01
-training_runs = 16000
+training_runs = 60000
 stochastic_gradient_descent = True
 num_epochs = 5000
 display_autoencoder_images = False
@@ -449,15 +449,15 @@ def main():
     
     # Train network(s) here
     training_params = [training_runs]
-    # feedforward_classifier_connections = train_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections, training_data, training_params)
-    # autoencoder_connections = train_autoencoder(autoencoder_state, autoencoder_connections, autoencoder_training_data, training_params)
+    feedforward_classifier_connections = train_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections, training_data, training_params)
+    autoencoder_connections = train_autoencoder(autoencoder_state, autoencoder_connections, autoencoder_training_data, training_params)
     [autoencoder_classifier_state, autoencoder_classifier_connections] = train_autoencoder_classifier(autoencoder_classifier_state, autoencoder_classifier_connections, training_data, training_params)
    
     
     # Test network(s) here
     test_params = None
-    # test_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections, test_data, test_params)
-    # test_autoencoder(autoencoder_state, autoencoder_connections, test_data, test_params)
+    test_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections, test_data, test_params)
+    test_autoencoder(autoencoder_state, autoencoder_connections, autoencoder_test_data, test_params)
     test_autoencoder_classifier(autoencoder_classifier_state, autoencoder_classifier_connections, test_data, test_params)
 
 
