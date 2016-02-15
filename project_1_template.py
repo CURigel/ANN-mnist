@@ -109,7 +109,7 @@ def init_feedforward_classifier(initialization_params):
     max_layer_size = layer_sizes.max()
 
     # Initially, no neurons are firing, so state is all zeros
-    # Except for thresholds, which we'll put 0.1 in for now.
+    # Except for thresholds, which we set to 1.
     neuron_states = np.zeros((num_layers, max_layer_size))
     threshold_values = np.ones(num_layers - 1)
     feedforward_classifier_state = [neuron_states, threshold_values]
