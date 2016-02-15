@@ -95,10 +95,10 @@ nonlinear_derivative_wrt_nonlinear_x = tanh_derivative_wrt_tanhx
 nonlinear_max_init_weight = tanh_init_weight_max
 
 
-train_size = 30000
-test_size = 30000
+train_size = 8000
+test_size = 8000
 learning_rate = 0.01
-training_runs = 60000
+training_runs = 16000
 stochastic_gradient_descent = True
 num_epochs = 5000
 display_autoencoder_images = False
@@ -432,14 +432,14 @@ def main():
     [feedforward_classifier_state, feedforward_classifier_connections] = init_feedforward_classifier(initialization_params)
 
     # Change network shape for auto-encoder
-    autoencoder_layer_sizes = np.asarray([input_size, 100, input_size])
+    autoencoder_layer_sizes = np.asarray([input_size, 200, input_size])
     autoencoder_initialization_params = [autoencoder_layer_sizes]
     autoencoder_state = None
     autoencoder_connections = None
     [autoencoder_state, autoencoder_connections] = init_autoencoder(autoencoder_initialization_params)
 
     # Two sets of parameters for autoencoder classifier
-    autoencoder_classifier_classifier_layer_sizes = np.asarray([100, 50, output_size])
+    autoencoder_classifier_classifier_layer_sizes = np.asarray([200, 100, output_size])
     autoencoder_classifier_classifier_init_params = [autoencoder_classifier_classifier_layer_sizes]
     autoencoder_classifier_init_params = [autoencoder_initialization_params, autoencoder_classifier_classifier_init_params]
     autoencoder_classifier_state = None
@@ -450,14 +450,14 @@ def main():
     # Train network(s) here
     training_params = [training_runs]
     feedforward_classifier_connections = train_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections, training_data, training_params)
-    autoencoder_connections = train_autoencoder(autoencoder_state, autoencoder_connections, autoencoder_training_data, training_params)
+    # autoencoder_connections = train_autoencoder(autoencoder_state, autoencoder_connections, autoencoder_training_data, training_params)
     [autoencoder_classifier_state, autoencoder_classifier_connections] = train_autoencoder_classifier(autoencoder_classifier_state, autoencoder_classifier_connections, training_data, training_params)
    
     
     # Test network(s) here
     test_params = None
     test_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections, test_data, test_params)
-    test_autoencoder(autoencoder_state, autoencoder_connections, autoencoder_test_data, test_params)
+    # test_autoencoder(autoencoder_state, autoencoder_connections, autoencoder_test_data, test_params)
     test_autoencoder_classifier(autoencoder_classifier_state, autoencoder_classifier_connections, test_data, test_params)
 
 

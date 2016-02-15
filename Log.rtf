@@ -36888,6 +36888,8 @@ ffff030000000000
 {\pntext\f1\'B7\tab}Done implementing the autoencoder classifier.  Fairly promising results so far- 89% correct on the test set with 100 neurons in the autoencoder layer and 50 in the classifier layer.\par
 {\pntext\f1\'B7\tab}So now it's time to experiment.  I think the first thing I'm going to try doing is increasing the MNIST set I'm looking at from 8000 training and test to 30000 training and test, to make use of the full database.  \par
 {\pntext\f1\'B7\tab}Using the full data set gives a 93.8% correct prediction rate for the 300 hidden layer neuron (HLN) feedforward classifier on the test set.  The regular autoencoder, with 100HLN, has a mean squared error of 2.6.  The autoencoder classifier has a 93.5% correct prediction rate on the test set, with 100 and then 50 HLU.  An interesting result.  The autoencoder classifier has only half as many hidden layer neurons total, but gets about the same prediction rate.  \par
+{\pntext\f1\'B7\tab}That run was interesting, but took too long for the purposes of doing a bunch of tests, so I'll go back down to 8000 each training and test images for now.\par
+{\pntext\f1\'B7\tab}I want to see if the autoencoder classifier can do better than the regular classifier if I gets a similar amount of neurons in the hidden layer.\line At 200+100 HLN the autoencoder classifier slightly outperforms the feedforward at 300.  Feedforward gets 88.4% and AE classifier gets 89.5%.  \par
 
 \pard\sa200\sl276\slmult1\par
 }
