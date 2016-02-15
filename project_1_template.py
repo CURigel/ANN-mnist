@@ -106,33 +106,29 @@ def init_feedforward_classifier(initialization_params):
     # Extract parameters
     layer_sizes = initialization_params[0]
     num_layers = layer_sizes.shape[0]
-    max_layer_size = layer_sizes.max()
 
     # Initially, no neurons are firing, so state is all zeros
     # Except for thresholds, which we set to 1.
-    neuron_states = np.zeros((num_layers, max_layer_size))
-    threshold_values = np.ones(num_layers - 1)
+    neuron_states = []
+    threshold_values = [1 for i in np.arange(num_layers - 1)]
+    for l in np.arange(num_layers):
+        neuron_states.append(np.zeros(layer_sizes[l]))
+
     feedforward_classifier_state = [neuron_states, threshold_values]
 
     # Calculate random weight interval.  See http://deeplearning.net/tutorial/mlp.html for justification
     max_weights = nonlinear_max_init_weight(layer_sizes)
     min_weights = max_weights * -1
 
-    # Initialize classifier weights.  Use a 3D array, layers x inputs x outputs.
-    # Threshold weights too, but only a 2D needed for those
-    # Also set weights for neurons which do not exist to 0
-    # Since those weights will never contribute to sums in subsequent layers,
-    # backpropagation should never cause them to change
-    layer_weights = np.ndarray((num_layers - 1, max_layer_size, max_layer_size))
-    threshold_weights = np.ndarray((num_layers - 1, max_layer_size))
+    # Initialize classifier weights.  Use a list of 2D ndarrays.
+    # Threshold weights too, but only 1D ndarrays needed for those
+    layer_weights = []
+    threshold_weights = []
     for l in np.arange(num_layers - 1):
-        layer_weights[l] = np.random.uniform(low=min_weights[l], high=max_weights[l],
-                                             size=(max_layer_size, max_layer_size))
-        threshold_weights[l] = np.random.uniform(low=min_weights[l], high=max_weights[l],
-                                                 size=max_layer_size)
-        layer_weights[l, layer_sizes[l]:max_layer_size, :] = 0
-        layer_weights[l, :, layer_sizes[l+1]:max_layer_size] = 0
-        threshold_weights[l, layer_sizes[l+1]:max_layer_size] = 0
+        layer_weights.append(np.random.uniform(low=min_weights[l], high=max_weights[l],
+                                               size=(layer_sizes[l], layer_sizes[l+1])))
+        threshold_weights.append(np.random.uniform(low=min_weights[l], high=max_weights[l],
+                                                   size=layer_sizes[l+1]))
     feedforward_classifier_connections = [layer_weights, threshold_weights]
 
     return [feedforward_classifier_state, feedforward_classifier_connections]
@@ -154,7 +150,7 @@ def update_feedforward_classifier(feedforward_classifier_state, feedforward_clas
     layer_weights = feedforward_classifier_connections[0]
     threshold_weights = feedforward_classifier_connections[1]
 
-    for l in np.arange(1, neuron_states.shape[0]):
+    for l in np.arange(1, len(neuron_states)):
         input_sum = layer_weights[l-1].T.dot(neuron_states[l-1])
         input_sum += threshold_values[l-1] * threshold_weights[l-1]
         neuron_states[l] = nonlinear(input_sum)
@@ -221,17 +217,19 @@ def backpropagate_feedforward_classifier(num_outputs, feedforward_classifier_sta
     label_vector = np.zeros(num_outputs)
     label_vector[label] = 1
     neuron_states = feedforward_classifier_state[0]
-    num_layers = neuron_states.shape[0]
-    max_layer_size = neuron_states.shape[1]
+    num_layers = len(neuron_states)
     layer_weights = feedforward_classifier_connections[0]
     threshold_weights = feedforward_classifier_connections[1]
 
-    weight_changes = np.ndarray((num_layers - 1, max_layer_size, max_layer_size))
-    threshold_changes = np.ndarray((num_layers - 1, max_layer_size))
+    weight_changes = []
+    threshold_changes = []
+    for l in np.arange(num_layers - 1):
+        weight_changes.append(np.ndarray((layer_weights[l].shape[0], layer_weights[l].shape[1])))
+        threshold_changes.append(np.ndarray(threshold_weights[l].shape[0]))
 
     # First consider the output deltas
-    error_vector = np.zeros(neuron_states.shape[1])
-    error_vector[:num_outputs] = neuron_states[-1][:num_outputs] - label_vector
+    error_vector = np.zeros(neuron_states[-1].shape[0])
+    error_vector = neuron_states[-1] - label_vector
     deriv_output_values = nonlinear_derivative_wrt_nonlinear_x(neuron_states[-1])
     output_delta = error_vector * deriv_output_values
 
@@ -244,8 +242,9 @@ def backpropagate_feedforward_classifier(num_outputs, feedforward_classifier_sta
         weight_delta_sums = layer_weights[l].dot(prev_delta)
         prev_delta = nonlinear_derivative_wrt_nonlinear_x(neuron_states[l]) * weight_delta_sums
 
-    layer_weights += weight_changes
-    threshold_weights += threshold_changes
+    for l in np.arange(num_layers - 1):
+        layer_weights[l] += weight_changes[l]
+        threshold_weights[l] += threshold_changes[l]
     return feedforward_classifier_connections
 
 # Functions for outputing the results of an ANN on a data set
