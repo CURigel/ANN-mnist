@@ -101,6 +101,7 @@ learning_rate = 0.01
 training_runs = 16000
 stochastic_gradient_descent = True
 num_epochs = 5000
+display_autoencoder_images = True
 
 # Initialize the corresponding networks
 def init_feedforward_classifier(initialization_params):
@@ -163,8 +164,7 @@ def update_autoencoder(autoencoder_state, autoencoder_connections):
     return update_feedforward_classifier(autoencoder_state, autoencoder_connections)
     
 def update_autoencoder_classifier(autoencoder_classifier_state, autoencoder_classifier_connections):
-    # Place your code here
-    return autoencoder_classifier_state
+    return update_feedforward_classifier(autoencoder_classifier_state, autoencoder_classifier_connections)
     
 
 # Main functions to handle the training of the networks. 
@@ -264,7 +264,6 @@ def output_feedforward_classifier_performance(feedforward_classifier_state, feed
 
     print '{}% correct prediction.'.format(float(correct) / float(data.shape[0]))
     print '{} mean squared error'.format(total_error / float(data.shape[0]))
-    None
 
 
 def output_autoencoder_performance(autoencoder_state, autoencoder_connections, check_data):
@@ -275,10 +274,32 @@ def output_autoencoder_performance(autoencoder_state, autoencoder_connections, c
     total_error = 0.0
     for i in np.arange(data.shape[0]):
         neuron_states[0] = data[i]
-        update_autoencoder_classifier(autoencoder_state, autoencoder_connections)
+        update_autoencoder(autoencoder_state, autoencoder_connections)
         total_error += np.linalg.norm((neuron_states[-1] - labels[i]))
 
     print '{} mean squared error.'.format(total_error / float(data.shape[0]))
+
+    # Show some pictures!
+    if display_autoencoder_images:
+        random_indices = np.random.randint(0, data.shape[0], 10)
+        inputs = np.copy(data[random_indices])
+        outputs = np.ndarray((10, data.shape[1]))
+        for i in np.arange(10):
+            neuron_states[0] = data[random_indices[i]]
+            update_autoencoder(autoencoder_state, autoencoder_connections)
+            outputs[i] = np.copy(neuron_states[-1])
+        input_viewable = denormalize(inputs)
+        output_viewable = denormalize(outputs)
+        mnist.visualize(np.concatenate((input_viewable, output_viewable)))
+    None
+
+
+def denormalize(x):
+    x_shifted = x - x.min()
+    x_normed = x_shifted / x_shifted.max()
+    x_scaled = x_normed * 255
+    return x_scaled.astype(int)
+
 
 # Main functions to handle the testing of the networks. 
 # Feel free to write auxiliary functions and call them from here.
@@ -368,7 +389,7 @@ def main():
     [feedforward_classifier_state, feedforward_classifier_connections] = init_feedforward_classifier(initialization_params)
 
     # Change network shape for auto-encoder
-    layer_sizes = np.asarray([input_size, 300, input_size])
+    layer_sizes = np.asarray([input_size, 100, input_size])
     initialization_params = [layer_sizes]
     autoencoder_state = None
     autoencoder_connections = None
