@@ -134,13 +134,14 @@ def init_feedforward_classifier(initialization_params):
 
     return [feedforward_classifier_state, feedforward_classifier_connections]
 
+
 def init_autoencoder(initialization_params):
-    # Place your code here
-    return [autoencoder_state, autoencoder_connections]
+    return init_feedforward_classifier(initialization_params)
+
 
 def init_autoencoder_classifier(initialization_params):
     # Place your code here
-    return [autoencoder_classifier_state, autoencoder_classifier_connections]
+    return [None, None]
 
 
 # Given an input, these functions calculate the corresponding output to 
@@ -159,58 +160,58 @@ def update_feedforward_classifier(feedforward_classifier_state, feedforward_clas
     return feedforward_classifier_state
     
 def update_autoencoder(autoencoder_state, autoencoder_connections):
-    # Place your code here
-    return autoencoder_state
+    return update_feedforward_classifier(autoencoder_state, autoencoder_connections)
     
 def update_autoencoder_classifier(autoencoder_classifier_state, autoencoder_classifier_connections):
     # Place your code here
     return autoencoder_classifier_state
     
-        
-        
+
 # Main functions to handle the training of the networks. 
 # Feel free to write auxiliary functions and call them from here.
 # These functions are supposed to call the update functions.
 def train_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections, training_data, training_params):
-    num_runs = training_params[0]
-    num_outputs = training_params[1]
-    data = training_data[0]
-    labels = training_data[1]
-    neuron_states = feedforward_classifier_state[0]
-
-    if stochastic_gradient_descent:
-        # Stochastic gradient descent
-        for i in np.arange(num_runs):
-            rand_index = np.random.randint(0, data.shape[0])
-            feedforward_classifier_connections = descend_point(data[rand_index], labels[rand_index], num_outputs, feedforward_classifier_state, feedforward_classifier_connections)
-    else:
-        # Gradient descent
-        for epoch in np.arange(num_epochs):
-            for i in np.arange(data.shape[0]):
-                feedforward_classifier_connections = descend_point(data[i], labels[i], num_outputs, feedforward_classifier_state, feedforward_classifier_connections)
-
-    print "Training set performance:"
+    train_network(feedforward_classifier_state, feedforward_classifier_connections, training_data, training_params)
+    print "Feedforward classifier training set performance:"
     output_feedforward_classifier_performance(feedforward_classifier_state, feedforward_classifier_connections, training_data)
     return feedforward_classifier_connections
+
+
+def train_autoencoder(autoencoder_state, autoencoder_connections, training_data, training_params):
+    train_network(autoencoder_state, autoencoder_connections, training_data, training_params)
+    print "Autoencoder training set performance"
+    output_autoencoder_performance(autoencoder_state, autoencoder_connections, training_data)
+    return autoencoder_connections
+
+
+def train_autoencoder_classifier(autoencoder_classifier_state, autoencoder_classifier_connections, training_data, training_params):
+    # Place your code here
+    
+    # Please do output your training performance here
+    return autoencoder_classifier_connections
+
+
+def train_network(state, connections, training_data, training_params):
+    num_runs = training_params[0]
+    neuron_states = state[0]
+    num_outputs = neuron_states[-1].shape[0]
+    data = training_data[0]
+    labels = training_data[1]
+
+    if stochastic_gradient_descent:
+        for i in np.arange(num_runs):
+            rand_index = np.random.randint(0, data.shape[0])
+            connections = descend_point(data[rand_index], labels[rand_index], num_outputs, state, connections)
+    else:  # Gradient descent
+        for epoch in np.arange(num_epochs):
+            for i in np.arange(data.shape[0]):
+                connections = descend_point(data[i], labels[i], num_outputs, state, connections)
 
 
 def descend_point(datum, label, num_outputs, feedforward_classifier_state, feedforward_classifier_connections):
     feedforward_classifier_state[0][0] = datum
     update_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections)
     return backpropagate_feedforward_classifier(num_outputs, feedforward_classifier_state, feedforward_classifier_connections, label)
-
-
-def train_autoencoder(autoencoder_state, autoencoder_connections, training_data, training_params):
-    # Place your code here
-    
-    # Please do output your training performance here
-    return autoencoder_connections
-
-def train_autoencoder(autoencoder_classifier_state, autoencoder_classifier_connections, training_data, training_params):
-    # Place your code here
-    
-    # Please do output your training performance here
-    return autoencoder_classifier_connections
 
 
 # Backpropagation functions
@@ -265,19 +266,33 @@ def output_feedforward_classifier_performance(feedforward_classifier_state, feed
     print '{} mean squared error'.format(total_error / float(data.shape[0]))
     None
 
+
+def output_autoencoder_performance(autoencoder_state, autoencoder_connections, check_data):
+    data = check_data[0]
+    labels = check_data[1]
+    neuron_states = autoencoder_state[0]
+
+    total_error = 0.0
+    for i in np.arange(data.shape[0]):
+        neuron_states[0] = data[i]
+        update_autoencoder_classifier(autoencoder_state, autoencoder_connections)
+        total_error += np.linalg.norm((neuron_states[-1] - labels[i]))
+
+    print '{} mean squared error.'.format(total_error / float(data.shape[0]))
+
 # Main functions to handle the testing of the networks. 
 # Feel free to write auxiliary functions and call them from here.
 # These functions are supposed to call the 'run' functions.
 def test_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections, test_data, test_params):
     # We assume here that the network has already been trained.
-    print "Test set performance:"
+    print "Feedforward classifier test set performance:"
     output_feedforward_classifier_performance(feedforward_classifier_state, feedforward_classifier_connections, test_data)
     None
     
 def test_autoencoder(autoencoder_state, autoencoder_connections, test_data, test_params):
-    # Place your code here
-    
-    # Please do output your test performance here
+    # We assume here that the network has already been trained.
+    print "Autoencoder classifier test set performance:"
+    output_autoencoder_performance(autoencoder_state, autoencoder_connections, test_data)
     None
 
 def test_autoencoder_classifier(autoencoder_classifier_state, autoencoder_classifier_connections, test_data, test_params):
@@ -313,8 +328,7 @@ def label_vectors_from_indicies(indicies, size):
 #     return [autoencoder_classifier_state, autoencoder_classifier_connections]
 
 
-if __name__=='__main__':
-
+def main():
     # Please use the following snippet for clarity if you have command-line 
     # arguments:
 
@@ -333,20 +347,17 @@ if __name__=='__main__':
     test_data = [full_mnist_data[train_size:], full_mnist_labels[train_size:]]
 
     training_data[1] = label_vectors_from_indicies(training_data[1], 10)
+
     test_data[1] = label_vectors_from_indicies(test_data[1], 10)
 
     # Normalize data
     training_data[0] = (training_data[0].astype(float) - training_data[0].mean()) / 256.0
     test_data[0] = (test_data[0].astype(float) - test_data[0].mean()) / 256.0
 
-    # You may also use the gui_template.py functions to collect image data from the user. eg:
-    # training_data = gt.get_images()
-    # if len(training_data) != 0:
-	#     gt.visualize_image(training_data[-1])
-    
-    # If you wish, you can have a loop here, or any other place really, that will update the
-    # parameters below automatically.
-    
+    # Modified data set for autoencoder
+    autoencoder_training_data = [training_data[0], training_data[0]]
+    autoencoder_test_data = [test_data[0], test_data[0]]
+
     # Initialize network(s) here
     input_size = (28 * 28)  # Pixels in the image
     output_size = 10  # Possible classifications
@@ -355,10 +366,14 @@ if __name__=='__main__':
     feedforward_classifier_state = None
     feedforward_classifier_connections = None 
     [feedforward_classifier_state, feedforward_classifier_connections] = init_feedforward_classifier(initialization_params)
-    # Change initialization params if desired
+
+    # Change network shape for auto-encoder
+    layer_sizes = np.asarray([input_size, 300, input_size])
+    initialization_params = [layer_sizes]
     autoencoder_state = None
     autoencoder_connections = None
     [autoencoder_state, autoencoder_connections] = init_autoencoder(initialization_params)
+
     # Change initialization params if desired
     autoencoder_classifier_state = None
     autoencoder_classifier_connections = None
@@ -366,20 +381,20 @@ if __name__=='__main__':
     
     
     # Train network(s) here
-    training_params = [training_runs, output_size]
-    feedforward_classifier_connections = train_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections, training_data, training_params)
+    training_params = [training_runs]
+    # feedforward_classifier_connections = train_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections, training_data, training_params)
+    autoencoder_connections = train_autoencoder(autoencoder_state, autoencoder_connections, autoencoder_training_data, training_params)
     # Change training params if desired
-    autoencoder_connections = train_autoencoder(autoencoder_state, autoencoder_connections, training_data, training_params)
-    # Change training params if desired
-    autoencoder_classifier_connections = train_autoencoder(autoencoder_classifier_state, autoencoder_classifier_connections, training_data, training_params)
+    autoencoder_classifier_connections = train_autoencoder_classifier(autoencoder_classifier_state, autoencoder_classifier_connections, training_data, training_params)
    
     
     # Test network(s) here
     test_params = None
-    test_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections, test_data, test_params)
-    # Change test params if desired
-    test_autoencoder(autoencoder_state, autoencoder_connections, test_data, test_params)
+    # test_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections, test_data, test_params)
+    test_autoencoder(autoencoder_state, autoencoder_connections, autoencoder_test_data, test_params)
     # Change test params if desired
     test_autoencoder_classifier(autoencoder_classifier_state, autoencoder_classifier_connections, test_data, test_params)
-	
-	# You can use gui_template.py functions for visualization as you wish
+
+
+if __name__ == '__main__':
+    main()
