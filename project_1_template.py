@@ -89,6 +89,7 @@ def sigm_init_weight_max(layer_sizes):
 
 
 nonlinear = np.tanh
+nonlinear_min_value = -1
 nonlinear_derivative = tanh_derivative
 nonlinear_derivative_wrt_nonlinear_x = tanh_derivative_wrt_tanhx
 nonlinear_max_init_weight = tanh_init_weight_max
@@ -287,7 +288,7 @@ def test_autoencoder_classifier(autoencoder_classifier_state, autoencoder_classi
 
 
 def label_vectors_from_indicies(indicies, size):
-    error_vectors = np.ones((indicies.shape[0], size))
+    error_vectors = np.tile(nonlinear_min_value, (indicies.shape[0], size))
     error_vectors[np.arange(indicies.shape[0]), indicies] = 1
     return error_vectors
 
