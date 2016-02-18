@@ -1,0 +1,33 @@
+Test started.
+
+Feedforward classifier training set performance:
+9.85% correct prediction.
+2.54982705291 mean squared error
+
+Autoencoder training set performance:
+26.9109627998 mean squared error.
+
+Training autoencoder classifier...
+Autoencoder training set performance:
+27.2648347314 mean squared error.
+
+Feedforward classifier training set performance:
+9.9375% correct prediction.
+2.54735216751 mean squared error
+
+Autoencoder classifier training set performance:
+9.9375% correct prediction.
+2.54735216751 mean squared error
+
+Feedforward classifier test set performance:
+9.5875% correct prediction.
+2.55725167402 mean squared error
+
+Autoencoder test set performance:
+26.9073215878 mean squared error.
+
+Autoencoder classifier test set performance:
+10.025% correct prediction.
+2.54487729602 mean squared error
+
+Test finished.
