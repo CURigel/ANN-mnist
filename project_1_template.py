@@ -49,6 +49,7 @@
 import numpy as np
 import mnist_load_show as mnist
 from scipy.special import expit
+import os
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from scipy import linalg,stats
@@ -77,6 +78,7 @@ def sigm_derivative_wrt_sigmx(x):
     return x * ((x * -1) + 1)
 
 
+# See http://deeplearning.net/tutorial/mlp.html for justification
 def tanh_init_weight_max(layer_sizes):
     layer_weight_maxes = np.ndarray(layer_sizes.shape[0] - 1)
     for i in np.arange(layer_weight_maxes.shape[0]):
@@ -84,6 +86,7 @@ def tanh_init_weight_max(layer_sizes):
     return layer_weight_maxes
 
 
+# See http://deeplearning.net/tutorial/mlp.html for justification
 def sigm_init_weight_max(layer_sizes):
     return tanh_init_weight_max(layer_sizes) * 4
 
@@ -94,7 +97,6 @@ nonlinear_derivative = tanh_derivative
 nonlinear_derivative_wrt_nonlinear_x = tanh_derivative_wrt_tanhx
 nonlinear_max_init_weight = tanh_init_weight_max
 
-
 train_size = 8000
 test_size = 8000
 learning_rate = 0.01
@@ -102,6 +104,20 @@ training_runs = 16000
 stochastic_gradient_descent = True
 num_epochs = 5000
 display_autoencoder_images = False
+
+init_weight_setting = 2  # 0 = all zero, 1 = random, 2 = random within literature supported optimum range
+
+skip_feedforward_classifier = False
+skip_autoencoder = False
+skip_autoencoder_classifier = False
+feedforward_classifier_hidden_layers = [300]
+autoencoder_hidden_layers = [200]
+autoencoder_classifier_autoencoder_hidden_layers = [200]
+autoencoder_classifier_classifier_hidden_layers = [100]
+
+output_file = 'output_1.txt'
+test_name = 'default'
+
 
 # Initialize the corresponding networks
 def init_feedforward_classifier(initialization_params):
@@ -118,8 +134,12 @@ def init_feedforward_classifier(initialization_params):
 
     feedforward_classifier_state = [neuron_states, threshold_values]
 
-    # Calculate random weight interval.  See http://deeplearning.net/tutorial/mlp.html for justification
-    max_weights = nonlinear_max_init_weight(layer_sizes)
+    # Calculate random weight interval.
+    max_weights = np.zeros(layer_sizes.shape[0]) # Assume all zero to start
+    if init_weight_setting == 1: # -1 to 1
+        max_weights += 1
+    if init_weight_setting == 2: # Literature supported optimum
+        max_weights = nonlinear_max_init_weight(layer_sizes)
     min_weights = max_weights * -1
 
     # Initialize classifier weights.  Use a list of 2D ndarrays.
@@ -162,10 +182,12 @@ def update_feedforward_classifier(feedforward_classifier_state, feedforward_clas
         neuron_states[l] = nonlinear(input_sum)
 
     return feedforward_classifier_state
-    
+
+
 def update_autoencoder(autoencoder_state, autoencoder_connections):
     return update_feedforward_classifier(autoencoder_state, autoencoder_connections)
-    
+
+
 def update_autoencoder_classifier(autoencoder_classifier_state, autoencoder_classifier_connections):
     return update_feedforward_classifier(autoencoder_classifier_state, autoencoder_classifier_connections)
     
@@ -175,14 +197,18 @@ def update_autoencoder_classifier(autoencoder_classifier_state, autoencoder_clas
 # These functions are supposed to call the update functions.
 def train_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections, training_data, training_params):
     train_network(feedforward_classifier_state, feedforward_classifier_connections, training_data, training_params)
-    print "Feedforward classifier training set performance:"
+    output = open(output_file, 'a')
+    output.write("Feedforward classifier training set performance:\n")
+    output.close()
     output_feedforward_classifier_performance(feedforward_classifier_state, feedforward_classifier_connections, training_data)
     return feedforward_classifier_connections
 
 
 def train_autoencoder(autoencoder_state, autoencoder_connections, training_data, training_params):
     train_network(autoencoder_state, autoencoder_connections, training_data, training_params)
-    print "Autoencoder training set performance:"
+    output = open(output_file, 'a')
+    output.write("Autoencoder training set performance:\n")
+    output.close()
     output_autoencoder_performance(autoencoder_state, autoencoder_connections, training_data)
     return autoencoder_connections
 
@@ -202,7 +228,9 @@ def train_autoencoder_classifier(autoencoder_classifier_state, autoencoder_class
     labels = training_data[1]
     autoencoder_training_data = [data, data]
 
-    print 'Training autoencoder classifier...'
+    output = open(output_file, 'a')
+    output.write('Training autoencoder classifier...\n')
+    output.close()
 
     # First, we train the autoencoder.
     train_autoencoder(autoencoder_state, autoencoder_connections, autoencoder_training_data, training_params)
@@ -227,7 +255,9 @@ def train_autoencoder_classifier(autoencoder_classifier_state, autoencoder_class
     autoencoder_classifier_state = [autoencoder_classifier_neuron_states, autoencoder_classifier_threshold_states]
     autoencoder_classifier_connections = [autoencoder_classifier_layer_weights, autoencoder_classifier_threshold_weights]
 
-    print 'Autoencoder classifier training set performance:'
+    output = open(output_file, 'a')
+    output.write('Autoencoder classifier training set performance:\n')
+    output.close()
     output_feedforward_classifier_performance(autoencoder_classifier_state, autoencoder_classifier_connections,
                                               training_data)
     return [autoencoder_classifier_state, autoencoder_classifier_connections]
@@ -305,8 +335,10 @@ def output_feedforward_classifier_performance(feedforward_classifier_state, feed
         correct += 1 if prediction == np.argmax(labels[i]) else 0
         total_error += np.linalg.norm((neuron_states[-1] - labels[i]))
 
-    print '{}% correct prediction.'.format((float(correct) / float(data.shape[0])) * 100)
-    print '{} mean squared error\n'.format(total_error / float(data.shape[0]))
+    output = open(output_file, 'a')
+    output.write('{}% correct prediction.\n'.format((float(correct) / float(data.shape[0])) * 100))
+    output.write('{} mean squared error\n\n'.format(total_error / float(data.shape[0])))
+    output.close()
 
 
 def output_autoencoder_performance(autoencoder_state, autoencoder_connections, check_data):
@@ -320,7 +352,9 @@ def output_autoencoder_performance(autoencoder_state, autoencoder_connections, c
         update_autoencoder(autoencoder_state, autoencoder_connections)
         total_error += np.linalg.norm((neuron_states[-1] - labels[i]))
 
-    print '{} mean squared error.\n'.format(total_error / float(data.shape[0]))
+    output = open(output_file, 'a')
+    output.write('{} mean squared error.\n\n'.format(total_error / float(data.shape[0])))
+    output.close()
 
     # Show some pictures!
     if display_autoencoder_images:
@@ -349,19 +383,25 @@ def denormalize(x):
 # These functions are supposed to call the 'run' functions.
 def test_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections, test_data, test_params):
     # We assume here that the network has already been trained.
-    print "Feedforward classifier test set performance:"
+    output = open(output_file, 'a')
+    output.write("Feedforward classifier test set performance:\n")
+    output.close()
     output_feedforward_classifier_performance(feedforward_classifier_state, feedforward_classifier_connections, test_data)
     None
     
 def test_autoencoder(autoencoder_state, autoencoder_connections, test_data, test_params):
     # We assume here that the network has already been trained.
-    print "Autoencoder test set performance:"
+    output = open(output_file, 'a')
+    output.write("Autoencoder test set performance:\n")
+    output.close()
     output_autoencoder_performance(autoencoder_state, autoencoder_connections, test_data)
     None
 
 def test_autoencoder_classifier(autoencoder_classifier_state, autoencoder_classifier_connections, test_data, test_params):
     # We assume here that the network has already been trained.
-    print "Autoencoder classifier test set performance:"
+    output = open(output_file, 'a')
+    output.write("Autoencoder classifier test set performance:\n")
+    output.close()
     output_feedforward_classifier_performance(autoencoder_classifier_state, autoencoder_classifier_connections, test_data)
     None
 
@@ -390,75 +430,135 @@ def label_vectors_from_indicies(indicies, size):
 #     None
 # def load_autoencoder(filename):
 #     return [autoencoder_classifier_state, autoencoder_classifier_connections]
+def load_parameters(test_number):
+    global output_file, train_size, test_size, learning_rate, training_runs, display_autoencoder_images, \
+        stochastic_gradient_descent, num_epochs, init_weight_setting, skip_feedforward_classifier, skip_autoencoder, \
+        skip_autoencoder_classifier, feedforward_classifier_hidden_layers, autoencoder_hidden_layers, \
+        autoencoder_classifier_classifier_hidden_layers, autoencoder_classifier_autoencoder_hidden_layers, nonlinear, \
+        nonlinear_min_value, nonlinear_derivative, nonlinear_derivative_wrt_nonlinear_x, nonlinear_max_init_weight
+
+    file_name = 'parameters_' + str(test_number) + '.txt'
+    if not os.path.isfile(file_name):
+        return False
+    param_file = open(file_name, 'r')
+
+    def get_single_param(): return param_file.readline().split()[0]
+
+    def get_list_param():
+        line = param_file.readline().split()
+        return [int(i) for i in line[1:int(line[0])+1]]
+
+    test_name = get_single_param()
+    output_file = 'out_{}_{}.txt'.format(test_number, test_name)
+    train_size = int(get_single_param())
+    test_size = int(get_single_param())
+    learning_rate = float(get_single_param())
+    training_runs = int(get_single_param())
+    use_tanh = get_single_param() == '1'
+    display_autoencoder_images = get_single_param() == '1'
+    stochastic_gradient_descent = get_single_param() == '1'
+    num_epochs = int(get_single_param())
+    init_weight_setting = int(get_single_param()) # 0 = all zero, 1 = random, 2 = random within literature supported optimum range
+    skip_feedforward_classifier = get_single_param() == '1'
+    skip_autoencoder = get_single_param() == '1'
+    skip_autoencoder_classifier = get_single_param() == '1'
+    feedforward_classifier_hidden_layers = get_list_param()
+    autoencoder_hidden_layers = get_list_param()
+    autoencoder_classifier_classifier_hidden_layers = get_list_param()
+    autoencoder_classifier_autoencoder_hidden_layers = get_list_param()
+
+    nonlinear = np.tanh if use_tanh else expit
+    nonlinear_min_value = -1 if use_tanh else 0
+    nonlinear_derivative = tanh_derivative if use_tanh else sigm_derivative
+    nonlinear_derivative_wrt_nonlinear_x = tanh_derivative_wrt_tanhx if use_tanh else sigm_derivative_wrt_sigmx
+    nonlinear_max_init_weight = tanh_init_weight_max if use_tanh else sigm_init_weight_max
+    param_file.close()
+    return True
 
 
 def main():
-    # Please use the following snippet for clarity if you have command-line 
-    # arguments:
+    test_number = 1
 
-    # if len(argv) < <number_of_expected_arguments>:
-    #    print('Usage: python', argv[0], '<expected_arg_1>', '<expected_arg_2>, ...')
-    #    exit(1)
-    
-    # arg_1 = argv[1]
-    # arg_2 = argv[2]
-    # ...
-    
-    
-    # Read data here
-    full_mnist_data, full_mnist_labels = mnist.read_mnist_training_data(train_size + test_size)
-    training_data = [full_mnist_data[:train_size], full_mnist_labels[:train_size]]
-    test_data = [full_mnist_data[train_size:], full_mnist_labels[train_size:]]
+    while load_parameters(test_number):
+        output = open(output_file, 'w')
+        output.write("Test started.\n\n")
+        output.close()
 
-    # Vectorize labels
-    training_data[1] = label_vectors_from_indicies(training_data[1], 10)
-    test_data[1] = label_vectors_from_indicies(test_data[1], 10)
+        # Read data here
+        full_mnist_data, full_mnist_labels = mnist.read_mnist_training_data(train_size + test_size)
+        training_data = [full_mnist_data[:train_size], full_mnist_labels[:train_size]]
+        test_data = [full_mnist_data[train_size:], full_mnist_labels[train_size:]]
 
-    # Normalize data
-    training_data[0] = (training_data[0].astype(float) - training_data[0].mean()) / 256.0
-    test_data[0] = (test_data[0].astype(float) - test_data[0].mean()) / 256.0
+        # Vectorize labels
+        training_data[1] = label_vectors_from_indicies(training_data[1], 10)
+        test_data[1] = label_vectors_from_indicies(test_data[1], 10)
 
-    # Modified data set for autoencoder
-    autoencoder_training_data = [training_data[0], training_data[0]]
-    autoencoder_test_data = [test_data[0], test_data[0]]
+        # Normalize data
+        training_data[0] = (training_data[0].astype(float) - training_data[0].mean()) / 255.0
+        test_data[0] = (test_data[0].astype(float) - test_data[0].mean()) / 255.0
 
-    # Initialize network(s) here
-    input_size = (28 * 28)  # Pixels in the image
-    output_size = 10  # Possible classifications
-    layer_sizes = np.asarray([input_size, 300, output_size])
-    initialization_params = [layer_sizes]
-    feedforward_classifier_state = None
-    feedforward_classifier_connections = None 
-    [feedforward_classifier_state, feedforward_classifier_connections] = init_feedforward_classifier(initialization_params)
+        # Modified data set for autoencoder
+        autoencoder_training_data = [training_data[0], training_data[0]]
+        autoencoder_test_data = [test_data[0], test_data[0]]
 
-    # Change network shape for auto-encoder
-    autoencoder_layer_sizes = np.asarray([input_size, 200, input_size])
-    autoencoder_initialization_params = [autoencoder_layer_sizes]
-    autoencoder_state = None
-    autoencoder_connections = None
-    [autoencoder_state, autoencoder_connections] = init_autoencoder(autoencoder_initialization_params)
+        # Initialize network(s) here
+        input_size = (28 * 28)  # Pixels in the image
+        output_size = 10  # Possible classifications
+        layer_sizes = np.asarray([input_size] + feedforward_classifier_hidden_layers + [output_size])
+        initialization_params = [layer_sizes]
+        feedforward_classifier_state = None
+        feedforward_classifier_connections = None
+        [feedforward_classifier_state, feedforward_classifier_connections] = init_feedforward_classifier(
+            initialization_params)
 
-    # Two sets of parameters for autoencoder classifier
-    autoencoder_classifier_classifier_layer_sizes = np.asarray([200, 100, output_size])
-    autoencoder_classifier_classifier_init_params = [autoencoder_classifier_classifier_layer_sizes]
-    autoencoder_classifier_init_params = [autoencoder_initialization_params, autoencoder_classifier_classifier_init_params]
-    autoencoder_classifier_state = None
-    autoencoder_classifier_connections = None
-    [autoencoder_classifier_state, autoencoder_classifier_connections] = init_autoencoder_classifier(autoencoder_classifier_init_params)
-    
-    
-    # Train network(s) here
-    training_params = [training_runs]
-    feedforward_classifier_connections = train_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections, training_data, training_params)
-    # autoencoder_connections = train_autoencoder(autoencoder_state, autoencoder_connections, autoencoder_training_data, training_params)
-    [autoencoder_classifier_state, autoencoder_classifier_connections] = train_autoencoder_classifier(autoencoder_classifier_state, autoencoder_classifier_connections, training_data, training_params)
-   
-    
-    # Test network(s) here
-    test_params = None
-    test_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections, test_data, test_params)
-    # test_autoencoder(autoencoder_state, autoencoder_connections, autoencoder_test_data, test_params)
-    test_autoencoder_classifier(autoencoder_classifier_state, autoencoder_classifier_connections, test_data, test_params)
+        # Change network shape for auto-encoder
+        autoencoder_layer_sizes = np.asarray([input_size] + autoencoder_hidden_layers + [input_size])
+        autoencoder_initialization_params = [autoencoder_layer_sizes]
+        autoencoder_state = None
+        autoencoder_connections = None
+        [autoencoder_state, autoencoder_connections] = init_autoencoder(autoencoder_initialization_params)
+
+        # Two sets of parameters for autoencoder classifier
+        autoencoder_classifier_classifier_layer_sizes = np.asarray([autoencoder_classifier_autoencoder_hidden_layers[-1]] +
+                                                                   autoencoder_classifier_classifier_hidden_layers +
+                                                                   [output_size])
+        autoencoder_classifier_autoencoder_layer_sizes = np.asarray([input_size] +
+                                                                    autoencoder_classifier_autoencoder_hidden_layers +
+                                                                    [input_size])
+        autoencoder_classifier_init_params = [[autoencoder_classifier_autoencoder_layer_sizes],
+                                              [autoencoder_classifier_classifier_layer_sizes]]
+        autoencoder_classifier_state = None
+        autoencoder_classifier_connections = None
+        [autoencoder_classifier_state, autoencoder_classifier_connections] = init_autoencoder_classifier(
+            autoencoder_classifier_init_params)
+
+        # Train network(s) here
+        training_params = [training_runs]
+        if not skip_feedforward_classifier:
+            feedforward_classifier_connections = train_feedforward_classifier(feedforward_classifier_state,
+                                                                              feedforward_classifier_connections,
+                                                                              training_data, training_params)
+        if not skip_autoencoder:
+            autoencoder_connections = train_autoencoder(autoencoder_state, autoencoder_connections,
+                                                        autoencoder_training_data, training_params)
+        if not skip_autoencoder_classifier:
+            [autoencoder_classifier_state, autoencoder_classifier_connections] = train_autoencoder_classifier(
+                autoencoder_classifier_state, autoencoder_classifier_connections, training_data, training_params)
+
+        # Test network(s) here
+        test_params = None
+        if not skip_feedforward_classifier:
+            test_feedforward_classifier(feedforward_classifier_state, feedforward_classifier_connections, test_data,
+                                        test_params)
+        if not skip_autoencoder:
+            test_autoencoder(autoencoder_state, autoencoder_connections, autoencoder_test_data, test_params)
+        if not skip_autoencoder_classifier:
+            test_autoencoder_classifier(autoencoder_classifier_state, autoencoder_classifier_connections, test_data,
+                                        test_params)
+        output = open(output_file, 'a')
+        output.write("Test finished.\n")
+        output.close()
+        test_number += 1
 
 
 if __name__ == '__main__':
