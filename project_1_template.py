@@ -1,51 +1,3 @@
-# This is the template code for Programming Project 1 - 
-# Option 1: Backpropagation and Autoencoders.
-#
-# You can add command-line arguments if you'd like (see below __main__).
-#
-# You can add 'parameters' to the functions in the respective arguments.
-# They are called 'initialization_params', 'training_params', and 'test_params'.
-# Think of these as means of controlling how your code works under different
-# settings. They are supposed to be python lists, so you can use them eg.:
-#    learning_rate = training_params[0]
-#    stopping_criterion = training_params[1]
-# etc.
-# You may also not use them if you do not need them, eg. if initialization
-# is completely random, initialization_params may not be necessary.
-#
-# XXX_state (eg. "feedforward_classifier_state") is a variable that is supposed to hold
-# current firing status of all the nodes in the network.
-# XXX_connections (eg. "feedforward_classifier_connections") is a variable that is supposed
-# to hold the weights of the connections between the nodes.
-# You have flexibility designing these variables.
-# eg, you may have a flat vector of dimensionality N for XXX_states, where N is the total number
-# of the nodes in the network, or you can as well have a list of state vectors, where each 
-# element (vector) in the list corresponds to one of the layers.
-# You can as well design XXX_connections variables as you wish, ie, use a flattened or 
-# layer-by-layer representation, or anything you would like really.
-#
-# You do not necessarily have to use every argument in every function, 
-# ie. feedforward_classifier_state argument is probably redundant in test_feedforward_classifier().
-#
-# You are very welcome to add more functions: They can be auxilary 
-# functions, plotting functions, anything you wish.
-#
-# Also feel free to add global variables if you like.
-#
-# In __main__ as well, you can add any additional code anywhere.
-# eg., you may consider having a loop for varying parameters.
-# You may also change the "flow" of the code, eg, you can collect
-# test data after training is complete: You have flexibility with
-# this code part really.
-#
-# For your "matrices":
-# You can use either the array or matrix type of numpy, or even switch 
-# between them as you wish.
-#
-# Enjoy! :)
-# Hande
- 
- 
 import numpy as np
 import mnist_load_show as mnist
 from scipy.special import expit
@@ -53,9 +5,6 @@ import os
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from scipy import linalg,stats
-import sklearn.preprocessing as skpre
-# Uncomment if you will use the GUI code:
-# import gui_template as gt
 
 
 #Parameters
@@ -412,24 +361,6 @@ def label_vectors_from_indicies(indicies, size):
     return error_vectors
 
 
-# You may also want to be able to save and load your networks, which will 
-# help you for debugging weird behavior. (Consider this seriously if you
-# are having debugging problems.)
-
-# def save_feedforward_classifier(filename, feedforward_classifier_state, feedforward_classifier_connections):
-#     None
-# def load_feedforward_classifier(filename):
-#     return [feedforward_classifier_state, feedforward_classifier_connections]
-
-# def save_autoencoder(filename, autoencoder_state, autoencoder_connections):
-#     None
-# def load_autoencoder(filename):
-#     return [autoencoder_state, autoencoder_connections]
-
-# def save_autoencoder_classifier(filename, autoencoder_classifier_state, autoencoder_classifier_connections):
-#     None
-# def load_autoencoder(filename):
-#     return [autoencoder_classifier_state, autoencoder_classifier_connections]
 def load_parameters(test_number):
     global output_file, train_size, test_size, learning_rate, training_runs, display_autoencoder_images, \
         stochastic_gradient_descent, num_epochs, init_weight_setting, skip_feedforward_classifier, skip_autoencoder, \
