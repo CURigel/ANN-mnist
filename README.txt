@@ -1,4 +1,5 @@
-I chose to do project topic 1: FeedForward-Backpropagation Neural Network, Autoencoders.
+I chose to do project topic 1: FeedForward-Backpropagation Neural Network, Autoencoders.  I chose to use the MNIST database of handwritten
+digits, located at http://yann.lecun.com/exdb/mnist/
 
 The project directory contains the following items:
 
