@@ -395,8 +395,8 @@ def load_parameters(test_number):
     skip_autoencoder_classifier = get_single_param() == '1'
     feedforward_classifier_hidden_layers = get_list_param()
     autoencoder_hidden_layers = get_list_param()
-    autoencoder_classifier_classifier_hidden_layers = get_list_param()
     autoencoder_classifier_autoencoder_hidden_layers = get_list_param()
+    autoencoder_classifier_classifier_hidden_layers = get_list_param()
 
     nonlinear = np.tanh if use_tanh else expit
     nonlinear_min_value = -1 if use_tanh else 0
