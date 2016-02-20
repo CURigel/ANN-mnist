@@ -97,3 +97,6 @@ target/
 
 # pycharm
 .idea/workspace.xml
+
+# zip files
+*.zip
