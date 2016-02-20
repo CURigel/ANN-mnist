@@ -1,0 +1,3 @@
+Test started.
+
+Training autoencoder classifier...

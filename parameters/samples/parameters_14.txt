@@ -1,0 +1,18 @@
+50_10_25_hidden_layers	test name
+8000 			train size
+8000 			test size
+0.01 			learning rate
+16000 			training runs
+1			use tanh?
+0			display autoencoder comparison images with matplotlib?
+1			use stochasitic gradient descent? (batch gradient descent with full data set if false)
+10			number of epochs (only used if not using stochasitic gradient descent)
+2			initial weight setting (0 = all zero, 1 = random -1 to 1, 2 = random in literature supported optimal range)
+0			skip training and testing the feedforward classifier
+0			skip training and testing the autoencoder
+0			skip training and testing the autoencoder classifier
+1 50			feedforward classifier hidden layers (number of layers, then layer sizes, eg. 0 / 1 200 / 2 100 100)
+1 10			autoencoder hidden layers (same format)
+1 10			autoencoder classifier layers after the autoencoder (same format)
+1 25			autoencoder classifier layers in the autoencoder (same format)
+

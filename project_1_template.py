@@ -368,7 +368,7 @@ def load_parameters(test_number):
         autoencoder_classifier_classifier_hidden_layers, autoencoder_classifier_autoencoder_hidden_layers, nonlinear, \
         nonlinear_min_value, nonlinear_derivative, nonlinear_derivative_wrt_nonlinear_x, nonlinear_max_init_weight
 
-    file_name = 'parameters_' + str(test_number) + '.txt'
+    file_name = os.path.join('parameters', 'parameters_' + str(test_number) + '.txt')
     if not os.path.isfile(file_name):
         return False
     param_file = open(file_name, 'r')
@@ -380,7 +380,7 @@ def load_parameters(test_number):
         return [int(i) for i in line[1:int(line[0])+1]]
 
     test_name = get_single_param()
-    output_file = 'out_{}_{}.txt'.format(test_number, test_name)
+    output_file = os.path.join('output', 'out_{}_{}.txt'.format(test_number, test_name))
     train_size = int(get_single_param())
     test_size = int(get_single_param())
     learning_rate = float(get_single_param())
