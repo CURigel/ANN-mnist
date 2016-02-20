@@ -1,0 +1,27 @@
+\begin{thebibliography}{GB10}
+\expandafter\ifx\csname url\endcsname\relax
+  \def\url#1{{\tt #1}}\fi
+\expandafter\ifx\csname urlprefix\endcsname\relax\def\urlprefix{URL }\fi
+\input babelbst.tex
+\newcommand{\Capitalize}[1]{\uppercase{#1}}
+\newcommand{\capitalize}[1]{\expandafter\Capitalize#1}
+
+\bibitem[GB10]{glorot2010understanding}
+Glorot, X. \bbland{} Bengio, Y., Understanding the difficulty of training deep
+  feedforward neural networks.
+\newblock  {\em International conference on artificial intelligence and
+  statistics}, 2010, \bblpages{} 249--256.
+
+\bibitem[LCB]{MNIST}
+LeCun, Y., Cortes, C. \bbland{} Burges, C.~J., The mnist database of
+  handwritten digits.
+\newblock \urlprefix\url{http://yann.lecun.com/exdb/mnist/}.
+\newblock Online; accessed 19-February-2016.
+
+\bibitem[Vas]{DeepTut}
+Vasilev, I., A deep learning tutorial: From perceptrons to deep networks.
+\newblock
+  \urlprefix\url{http://www.toptal.com/machine-learning/an-introduction-to-deep-learning-from-perceptrons-to-deep-networks}.
+\newblock Online; accessed 19-February-2016.
+
+\end{thebibliography}
